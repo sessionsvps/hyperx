@@ -30,15 +30,22 @@ async def getListOfGroups(client):
         for dialog in dialogs:
             if dialog.is_group or dialog.is_channel:
                 entity = await client.get_entity(dialog.id)
-                can_send_messages = entity.default_banned_rights is None or not entity.default_banned_rights.send_messages
+                
+                # Check if entity has 'default_banned_rights' attribute
+                if hasattr(entity, 'default_banned_rights'):
+                    can_send_messages = entity.default_banned_rights is None or not entity.default_banned_rights.send_messages
+                else:
+                    # Entity is likely ChatForbidden or ChannelForbidden
+                    can_send_messages = False
+
                 if can_send_messages:
                     group_info = {'group_id': dialog.id, 'group_name': dialog.title}
                     groups_info.append(group_info)
-
         return groups_info
     except Exception as e:
         print(e)
         return []
+
 
 async def getMessagesFromGroup(client, group_id):
     try:
